@@ -1,30 +1,32 @@
-from pathlib import Path
+import joblib
 
-import typer
-from loguru import logger
-from tqdm import tqdm
+def load_model_and_predict(model_path,
+                           vectorizer_path,
+                           encoder_path,
+                           text_samples=None):
+    """
+    Loads the trained model, vectorizer, and label encoder to predict sentiment.
 
-from news_project.config import MODELS_DIR, PROCESSED_DATA_DIR
+    Parameters:
+    - model_path: Path to the trained model
+    - vectorizer_path: Path to the saved TF-IDF vectorizer
+    - encoder_path: Path to the saved LabelEncoder
+    - text_samples: List of text samples to predict
 
-app = typer.Typer()
+    Returns:
+    - List of predicted sentiment labels
+    """
 
+    # Load model, vectorizer, and encoder
+    model = joblib.load(model_path)
+    vectorizer = joblib.load(vectorizer_path)
+    label_encoder = joblib.load(encoder_path)
 
-@app.command()
-def main(
-    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
-    features_path: Path = PROCESSED_DATA_DIR / "test_features.csv",
-    model_path: Path = MODELS_DIR / "model.pkl",
-    predictions_path: Path = PROCESSED_DATA_DIR / "test_predictions.csv",
-    # -----------------------------------------
-):
-    # ---- REPLACE THIS WITH YOUR OWN CODE ----
-    logger.info("Performing inference for model...")
-    for i in tqdm(range(10), total=10):
-        if i == 5:
-            logger.info("Something happened for iteration 5.")
-    logger.success("Inference complete.")
-    # -----------------------------------------
+    # Transform text into numerical format
+    text_tfidf = vectorizer.transform(text_samples)
 
+    # Predict sentiment
+    predictions = model.predict(text_tfidf)
+    predicted_labels = label_encoder.inverse_transform(predictions)
 
-if __name__ == "__main__":
-    app()
+    return predicted_labels
