@@ -1,32 +1,23 @@
 import joblib
 
-def load_model_and_predict(model_path,
-                           vectorizer_path,
-                           encoder_path,
-                           text_samples=None):
+def load_model_and_predict(model_path, vectorizer_path, text_samples):
     """
-    Loads the trained model, vectorizer, and label encoder to predict sentiment.
-
-    Parameters:
-    - model_path: Path to the trained model
-    - vectorizer_path: Path to the saved TF-IDF vectorizer
-    - encoder_path: Path to the saved LabelEncoder
-    - text_samples: List of text samples to predict
-
-    Returns:
-    - List of predicted sentiment labels
+    Loads the trained model and vectorizer to predict sentiment.
     """
+    loaded_model = joblib.load(model_path)
+    loaded_vectorizer = joblib.load(vectorizer_path)
+    # Load trained model (which is stored inside a dictionary)
 
-    # Load model, vectorizer, and encoder
-    model = joblib.load(model_path)
+    if loaded_model is None:
+        raise ValueError("Error: Model not found in the saved file.")
+
+    # Load vectorizer
     vectorizer = joblib.load(vectorizer_path)
-    label_encoder = joblib.load(encoder_path)
 
     # Transform text into numerical format
     text_tfidf = vectorizer.transform(text_samples)
 
     # Predict sentiment
-    predictions = model.predict(text_tfidf)
-    predicted_labels = label_encoder.inverse_transform(predictions)
+    predictions = loaded_model.predict(text_tfidf)
 
-    return predicted_labels
+    return predictions

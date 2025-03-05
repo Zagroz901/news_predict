@@ -17,6 +17,7 @@ import os
 # # دوال التحسين
 # from tensorflow.keras.optimizers import Adam, RMSprop 
 # ✅ Function: Evaluate Classification Model
+# ✅ Function: Evaluate Classification Model
 def evaluate_classification(y_true, y_pred):
     """
     Evaluates classification model performance using accuracy, F1-score, precision, and recall.
@@ -36,56 +37,27 @@ def evaluate_classification(y_true, y_pred):
     }
 
 
-
-
-def train_and_evaluate(model, X_train, y_train, X_test, y_test, models_df, trained_models, model_name=None):
+# ✅ Train & Evaluate Any Classification Model
+def train_and_evaluate(model, X_train, y_train, X_test, y_test, models_df, trained_models):
     """
     Trains a classification model, evaluates its performance, and appends results to models_df.
-
-    Parameters:
-    - model: Any classification model instance (e.g., LogisticRegression, RandomForestClassifier, etc.)
-    - X_train, y_train: Training data
-    - X_test, y_test: Testing data
-    - models_df: DataFrame to store model evaluation results
-    - trained_models: Dictionary to store trained models
-    - model_name: Optional, specify a custom name for the model in the results table
-
-    Returns:
-    - Updated models DataFrame
     """
     
-    logger.info(f"Starting training for model: {type(model).__name__}")
+    model_name = type(model).__name__
+    logger.info(f"Training model: {model_name}")
 
     try:
-        # Train the model
+        # Train Model
         model.fit(X_train, y_train)
-        logger.success(f"Model {type(model).__name__} trained successfully!")
+        logger.success(f"Model {model_name} trained successfully!")
 
-        # Make predictions
-        predictions = model.predict(X_test)
-        logger.info(f"Predictions made using model: {type(model).__name__}")
+        # Predictions
+        y_pred = model.predict(X_test)
+        logger.info("Predictions completed!")
 
-        # Evaluate performance
-        evaluation_results = evaluate_classification(y_test, predictions)
-        logger.info(f"Evaluation completed for model: {type(model).__name__}")
-
-        # Compute cross-validation accuracy
-        try:
-            cross_val_accuracy = cross_val_score(model, X_train, y_train, cv=5, scoring="accuracy").mean()
-            logger.info(f"Cross-validation accuracy: {cross_val_accuracy:.4f}")
-        except Exception as e:
-            logger.error(f"Cross-validation failed for {type(model).__name__}: {e}")
-            cross_val_accuracy = None
-
-        # Determine model name
-        if model_name is None:
-            model_name = type(model).__name__
-            trained_models[model_name] = model
-
-        # Log evaluation metrics
-        logger.info(f"Evaluation Metrics for {model_name}: Accuracy={evaluation_results['Accuracy']:.2f}, "
-                    f"F1 Score={evaluation_results['F1 Score']:.2f}, Precision={evaluation_results['Precision']:.2f}, "
-                    f"Recall={evaluation_results['Recall']:.2f}, Cross-Validation Accuracy={cross_val_accuracy:.2f}")
+        # Evaluate Performance
+        evaluation_results = evaluate_classification(y_test, y_pred)
+        logger.success(f"Evaluation Results for {model_name}: {evaluation_results}")
 
         # Append results to DataFrame
         new_row = {
@@ -94,36 +66,36 @@ def train_and_evaluate(model, X_train, y_train, X_test, y_test, models_df, train
             "F1 Score": evaluation_results["F1 Score"],
             "Precision": evaluation_results["Precision"],
             "Recall": evaluation_results["Recall"],
-            "Cross-Validation Accuracy": cross_val_accuracy
         }
         models_df = pd.concat([models_df, pd.DataFrame([new_row])], ignore_index=True)
 
+        trained_models[model_name] = model
         logger.success(f"Model {model_name} evaluation saved successfully!")
 
     except Exception as e:
-        logger.error(f"Training failed for {type(model).__name__}: {e}")
+        logger.error(f"Training failed for {model_name}: {e}")
 
     return models_df, trained_models
 
 
 
-# التصريح عن دالة إنشاء نموذج التعلم
-# مع إعطاء قيم أولية للمعاملات المترفعة
-def create_model(embed_dim = 32, hidden_unit = 16, dropout_rate = 0.2, optimizers = RMSprop, learning_rate = 0.001):
-    # التصريح عن نموذج تسلسلي
-    model = Sequential()
-    # طبقة التضمين
-    model.add(Embedding(input_dim = max_words, output_dim = embed_dim, input_length = max_len))
-    # LSTM
-    model.add(LSTM(units = hidden_unit ,dropout=dropout_rate))
-    # الطبقة الأخيرة
-    model.add(Dense(units = 3, activation = 'softmax'))
-    # يناء النموذج
-    model.compile(loss = 'sparse_categorical_crossentropy', optimizer = optimizers(learning_rate = learning_rate), metrics = ['accuracy'])
-    # طباعة ملخص النموذج
-    print(model.summary())
+# # التصريح عن دالة إنشاء نموذج التعلم
+# # مع إعطاء قيم أولية للمعاملات المترفعة
+# def create_model(embed_dim = 32, hidden_unit = 16, dropout_rate = 0.2, optimizers = RMSprop, learning_rate = 0.001):
+#     # التصريح عن نموذج تسلسلي
+#     model = Sequential()
+#     # طبقة التضمين
+#     model.add(Embedding(input_dim = max_words, output_dim = embed_dim, input_length = max_len))
+#     # LSTM
+#     model.add(LSTM(units = hidden_unit ,dropout=dropout_rate))
+#     # الطبقة الأخيرة
+#     model.add(Dense(units = 3, activation = 'softmax'))
+#     # يناء النموذج
+#     model.compile(loss = 'sparse_categorical_crossentropy', optimizer = optimizers(learning_rate = learning_rate), metrics = ['accuracy'])
+#     # طباعة ملخص النموذج
+#     print(model.summary())
  
-    return model
+#     return model
 
 def save_best_model(model_name, trained_models, save_path="news_project/models/ml_models/"):
     """
