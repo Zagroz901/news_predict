@@ -10,14 +10,7 @@ from joblib import Parallel, delayed
 from loguru import logger
 import joblib
 import os 
-# # تضمين النموذج التسلسلي
-# from keras.models import Sequential
-# # تضمين  الطبقات اللازمة
-# from keras.layers import Embedding, Dense, LSTM
-# # دوال التحسين
-# from tensorflow.keras.optimizers import Adam, RMSprop 
-# ✅ Function: Evaluate Classification Model
-# ✅ Function: Evaluate Classification Model
+
 def evaluate_classification(y_true, y_pred):
     """
     Evaluates classification model performance using accuracy, F1-score, precision, and recall.
